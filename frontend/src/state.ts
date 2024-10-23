@@ -17,8 +17,8 @@ class Bar {
     constructor(id: string) {
         this.ganttBarConfig = new GBC()
         this.ganttBarConfig.id = id
-        this.start = '2024-07-01'
-        this.end = '2024-07-10'
+        this.start = '2024-10-01'
+        this.end = '2024-10-10'
         this.ganttBarConfig.label = 'bar'
         this.ganttBarConfig.hasHandles = true
     }

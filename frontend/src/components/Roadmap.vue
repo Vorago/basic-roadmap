@@ -1,5 +1,5 @@
 <template>
-  <ContextMenu ref="menuRef" :model="menuItems" />
+  <ContextMenu ref="menuRef" :model="menuItems"/>
   <g-gantt-chart
       chart-start="2024-10-01"
       chart-end="2024-12-01"
@@ -11,13 +11,8 @@
   >
     <span v-for="(sl, index) in store.swimlanes" style="display: flex; flex-direction: row">
       <span class="swimlane">
-        <button class="btn" @click="store.removeSwimlane(index)">-</button>
-        <button class="btn" @click="store.addBarToSwimlane(index)">+</button>
-        <span @contextmenu.prevent="showContextForSwimlane($event)">
-            <EditableText
-                :value="sl.name"
-                @save="(name:string) => store.renameSwimlane(index, name)"
-            />
+        <span @contextmenu.prevent="showContextForSwimlane($event, index, sl.name)">
+            {{ sl.name }}
         </span>
       </span>
 
@@ -31,7 +26,6 @@
 import {GanttBarObject, GGanttChart, GGanttRow} from "@infectoone/vue-ganttastic";
 import {GetSwimlanes} from "../../wailsjs/go/main/App.js";
 import {store} from "../state"
-import EditableText from "./EditableText.vue";
 
 import {defineAsyncComponent, ref} from "vue";
 import {MenuItem, MenuItemCommandEvent} from "primevue/menuitem";
@@ -53,27 +47,65 @@ function showContextForBar(bar: GanttBarObject, e: Event, datetime: any) {
       command: (e) => showModal(e, barID, barLabel),
     },
     {
-      label: 'Move Up'
+      label: 'Move Up',
+      disabled: true
     },
     {
-      label: 'Move Down'
+      label: 'Move Down',
+      disabled: true
     }
   ]
   menuRef.value.show(e);
 }
 
-function showContextForSwimlane(e: Event) {
+function showContextForSwimlane(e: Event, index: number, title: string) {
   menuItems.value = [
     {
-      label: 'Rename'
+      label: 'Rename',
+      command: (e) => showSwimlaneRenameModal(e, index, title)
     },
     {
-      label: 'Delete'
+      label: 'Delete',
+      command: () => store.removeSwimlane(index)
+    },
+    {
+      label: 'Add Bar',
+      command: () => store.addBarToSwimlane(index)
     }
   ]
   menuRef.value.show(e);
 }
 
+
+function showSwimlaneRenameModal(e: MenuItemCommandEvent, index: number, title: string) {
+  dialog.open(modalInput, {
+        props: {
+          header: "Edit Swimlane Title",
+          style: {
+            width: '50vw',
+          },
+          breakpoints: {
+            '960px': '75vw',
+            '640px': '90vw'
+          },
+          modal: true,
+        },
+        data: {
+          title: title,
+          id: index
+        },
+        onClose: (e) => {
+        },
+        emits: {
+          onSave: (e: any) => {
+            console.log('saving')
+            console.log(e)
+            store.renameSwimlane(index, e.title)
+          }
+        }
+      }
+  )
+}
 
 function showModal(e: MenuItemCommandEvent, barID: string, barLabel: string) {
   dialog.open(modalInput, {
