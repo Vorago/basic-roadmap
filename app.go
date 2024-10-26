@@ -15,59 +15,20 @@ import (
 // App struct
 type App struct {
 	ctx   context.Context
-	state []Swimlane
+	state *State
+}
+
+type State struct {
+	Swimlanes []Swimlane `json:"swimlanes"`
+	Config    config     `json:"config"`
 }
 
 // NewApp creates a new App application struct
-func NewApp() *App {
+func NewApp(conf *config) *App {
 	return &App{
-		state: []Swimlane{
-			{
-				Name: "Backend",
-				Items: []Bar{
-					{
-						Start: "2024-11-01",
-						End:   "2024-11-15",
-						GanttBarConfig: GanttBarConfig{
-							Id:         "item-3",
-							Label:      "Milestone support",
-							HasHandles: true,
-						},
-					},
-					{
-						Start: "2024-10-01",
-						End:   "2024-10-15",
-						GanttBarConfig: GanttBarConfig{
-							Id:         "item-4",
-							Label:      "Move across lanes",
-							HasHandles: true,
-						},
-					},
-				},
-			},
-			{
-				Name: "Frontend",
-				Items: []Bar{
-					{
-						Start: "2024-10-16",
-						End:   "2024-10-30",
-						GanttBarConfig: GanttBarConfig{
-							Id:         "item-1",
-							Label:      "Context menu",
-							HasHandles: true,
-						},
-					},
-					{
-						Start: "2024-11-01",
-						End:   "2024-11-15",
-						GanttBarConfig: GanttBarConfig{
-							Id:         "item-2",
-							Label:      "Adjust daterange",
-							HasHandles: true,
-						},
-					},
-				},
-			},
+		state: &State{
+			Swimlanes: sampleData(conf.requireStartDate()),
+			Config:    *conf,
 		},
 	}
 }
@@ -79,7 +40,7 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) UpdateSwimlanes(swimlanes []Swimlane) {
-	a.state = swimlanes
+	a.state.Swimlanes = swimlanes
 	a.saveToFile()
 }
 
@@ -118,8 +79,8 @@ func (a *App) LoadFromFile() []Swimlane {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
 
-	a.state = payload
-	return a.state
+	a.state.Swimlanes = payload
+	return a.state.Swimlanes
 }
 
 func (a *App) saveToFile() {
@@ -146,24 +107,9 @@ func (a *App) saveToFile() {
 }
 
 func (a *App) GetSwimlanes() []Swimlane {
+	return a.state.Swimlanes
+}
+
+func (a *App) GetState() *State {
 	return a.state
-}
-
-type Swimlane struct {
-	Name  string `json:"name"`
-	Start string `json:"start"`
-	End   string `json:"end"`
-	Items []Bar  `json:"items"`
-}
-
-type Bar struct {
-	Start          string         `json:"start"`
-	End            string         `json:"end"`
-	GanttBarConfig GanttBarConfig `json:"ganttBarConfig"`
-}
-
-type GanttBarConfig struct {
-	Id         string `json:"id"`
-	Label      string `json:"label"`
-	HasHandles bool   `json:"hasHandles"`
 }

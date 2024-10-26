@@ -1,8 +1,8 @@
 <template>
   <ContextMenu ref="menuRef" :model="menuItems"/>
   <g-gantt-chart
-      chart-start="2024-10-01"
-      chart-end="2024-12-01"
+      :chart-start="store.config.startDate"
+      :chart-end="store.config.endDate"
       precision="week"
       bar-start="start"
       bar-end="end"
@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import {GanttBarObject, GGanttChart, GGanttRow} from "@infectoone/vue-ganttastic";
-import {GetSwimlanes} from "../../wailsjs/go/main/App.js";
+import {GetState, GetSwimlanes} from "../../wailsjs/go/main/App.js";
 import {store} from "../state"
 
 import {defineAsyncComponent, ref} from "vue";
@@ -137,10 +137,9 @@ function showModal(e: MenuItemCommandEvent, barID: string, barLabel: string) {
   )
 }
 
-GetSwimlanes().then(s => {
+GetState().then(s => {
   store.init(s)
 })
-
 </script>
 
 <style>

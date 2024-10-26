@@ -2,6 +2,8 @@ package main
 
 import (
 	"embed"
+	"fmt"
+	"log"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -12,10 +14,17 @@ import (
 var assets embed.FS
 
 func main() {
-	app := NewApp()
+	conf, err := tryLoadConfigFromFile()
+	fmt.Println("=========================")
+	fmt.Printf("%v\n", conf)
+	if err != nil {
+		log.Fatalf("failed to load config %s", err)
+	}
 
-	err := wails.Run(&options.App{
-		Title:  "basic-roadmap",
+	app := NewApp(conf)
+
+	err = wails.Run(&options.App{
+		Title:  "Basic Roadmap",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{

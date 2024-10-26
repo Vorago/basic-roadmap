@@ -4,7 +4,10 @@ go 1.21
 
 toolchain go1.23.0
 
-require github.com/wailsapp/wails/v2 v2.9.1
+require (
+	github.com/BurntSushi/toml v1.4.0
+	github.com/wailsapp/wails/v2 v2.9.1
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect

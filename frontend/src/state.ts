@@ -1,7 +1,8 @@
 import {reactive} from 'vue'
 import {GetSwimlanes, LoadFromFile, UpdateSwimlanes} from "../wailsjs/go/main/App.js";
 import {main} from "../wailsjs/go/models";
-import { useFileDialog } from '@vueuse/core'
+import {useFileDialog} from '@vueuse/core'
+import State = main.State;
 
 class GBC {
     public id!: string;
@@ -31,19 +32,32 @@ class Swimlane {
     public items!: Bar[];
 }
 
+class Config {
+    public startDate!: string;
+    public endDate!: string;
+}
 
 class Store {
     public swimlanes!: Swimlane[]
+    public config!: Config
+
     public addSwimlane() {
         let sw = new Swimlane()
         sw.items = []
         sw.name = "new"
         this.swimlanes.push(sw)
     }
+
     public removeSwimlane(index: number) {
         this.swimlanes.splice(index, 1)
     }
-    public init(swimlanes: Swimlane[]) {
+
+    public init(state: State) {
+        this.swimlanes = state.swimlanes
+        this.config = state.config
+    }
+
+    public setSwimlanes(swimlanes: Swimlane[]) {
         this.swimlanes = swimlanes
     }
 
@@ -56,15 +70,18 @@ class Store {
         })
     }
 
-    public updateBarTitle(id: string, title: string){
+    public updateBarTitle(id: string, title: string) {
         this.swimlanes.forEach(sl => this.updateBar(sl.items, id, title))
     }
+
     public addBarToSwimlane(index: number) {
         this.swimlanes[index].items.push(new Bar('idid'))
     }
+
     public renameSwimlane(index: number, name: string) {
         this.swimlanes[index].name = name
     }
+
     public saveToBackend() {
         UpdateSwimlanes(this.swimlanes.map(main.Swimlane.createFrom))
             .catch((err) => console.log(err))
@@ -72,7 +89,7 @@ class Store {
 
     public loadFromBackend() {
         LoadFromFile().then(s => {
-            store.init(s)
+            store.setSwimlanes(s)
         })
     }
 }
